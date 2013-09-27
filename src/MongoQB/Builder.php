@@ -860,6 +860,61 @@ class Builder
         }
     }
 
+
+    /**
+     * Save.
+     *
+     * Save a new document
+     *
+     * @param string $collection Name of the collection
+     * @param array  $insert     The document to be inserted
+     * @param array  $options    Array of options
+     *
+     * @access public
+     * @return boolean
+     */
+    public function save($collection = '', $insert = array(),
+     $options = array())
+    {
+        if (empty($collection)) {
+            throw new \MongoQB\Exception('No Mongo collection selected to save
+             into');
+        }
+
+        if (count($insert) === 0 OR ! is_array($insert)) {
+            throw new \MongoQB\Exception('Nothing to save into Mongo collection
+             or save is not an array');
+        }
+
+        $options = array_merge(
+                    array(
+                        $this->_querySafety => true
+                    ),
+                    $options
+                );
+
+        try {
+            $this->_dbhandle
+                ->{$collection}
+                ->save($insert, $options);
+
+            if (isset($insert['_id'])) {
+                return $insert['_id'];
+            } else {
+                // @codeCoverageIgnoreStart
+                return false;
+                // @codeCoverageIgnoreEnd
+            }
+        }
+        // @codeCoverageIgnoreStart
+        catch (\MongoCursorException $Exception) {
+            throw new \MongoQB\Exception('Insert of data into MongoDB failed: ' .
+             $Exception->getMessage());
+            // @codeCoverageIgnoreEnd
+        }
+    }
+
+
     /**
      * Insert.
      *
