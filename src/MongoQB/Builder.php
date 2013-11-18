@@ -779,6 +779,25 @@ class Builder
     }
 
     /**
+    * Get a single element
+    *
+    * Returns one document that satisfies the specified query
+    *
+    * @param string $collection    Name of the collection
+    *
+    * @access public
+    * @return array|null
+    */
+    public function getOne($collection = '')
+    {
+        // find().limit(1) faster than findOne()
+        // http://dba.stackexchange.com/a/7587
+        $data = $this->limit(1)->get($collection);
+        return ($data) ? reset($data) : NULL;
+    }
+
+
+    /**
     * Count.
     *
     * Count the number of found documents
@@ -1395,6 +1414,7 @@ class Builder
              collection because no keys were specified');
         }
 
+        $keys = array();
         foreach ($fields as $field => $value) {
             if($value === -1 OR $value === false OR
              strtolower($value) === 'desc') {
@@ -1575,7 +1595,7 @@ class Builder
             return $this;
         }
         // @codeCoverageIgnoreStart
-        catch (MongoConnectionException $Exception) {
+        catch (\MongoConnectionException $Exception) {
                 throw new \MongoQB\Exception('Unable to connect to MongoDB: ' .
                  $Exception->getMessage());
                 // @codeCoverageIgnoreEnd
